@@ -1,23 +1,31 @@
 import React, { useState } from "react";
 import { useFeedPostStyles } from "../../styles";
 import UserCard from "../shared/UserCard";
-import { CommentIcon, MoreIcon, ShareIcon } from "../../icons";
+import { CommentIcon, LikeIcon, MoreIcon, RemoveIcon, SaveIcon, ShareIcon, UnlikeIcon } from "../../icons";
 import { Link } from "react-router-dom";
-import { Button, Divider, Typography, Hidden } from "@material-ui/core";
+import { Button, Divider, Typography, Hidden, TextField } from "@material-ui/core";
 import HTMLEllipsis from "react-lines-ellipsis/lib/html";
+import FollowSuggestions from "../shared/FollowSuggestions";
+import OptionsDialog from "../shared/OptionsDialog";
 
-const FeedPost = ({ post }) => {
+const FeedPost = ({ post, index }) => {
  const classes = useFeedPostStyles();
  const [showCaption, setCaption] = useState(false);
+ const [showOptionsDialog, setOptionsDialog] = useState();
  const { media, id, likes, user, caption, comments } = post;
+
+ const showFollowSuggestions = index === 1;
 
   return (
     <>
-      <article className={classes.article}>
+      <article className={classes.article}
+        style={ {marginBottom: showFollowSuggestions && 30} }
+      >
         <div className={classes.postHeader}>
-          <UserCard />
+          <UserCard user={user} />
           <MoreIcon 
-            className={classes.MoreIcon}
+            className={classes.moreIcon}
+            onClick={() => setOptionsDialog(true)}
           />
         </div>
         <div>
@@ -106,20 +114,84 @@ const FeedPost = ({ post }) => {
           <Comment />
         </Hidden>
       </article>
+      {showFollowSuggestions && <FollowSuggestions />}
+      {showOptionsDialog && <OptionsDialog onClose={() => setOptionsDialog(false)}/>}
     </>
   )
 }
 
 const LikeButton = () => {
-  return <>LikeButton</>
+  const classes = useFeedPostStyles();
+  const [liked, setLiked] = useState(false);
+  const Icon = liked ? UnlikeIcon : LikeIcon;
+  const className = liked ? classes.liked : classes.like;
+
+  const handleLike = () => {
+    console.log("Like");
+    setLiked(true);
+  }
+
+  const handleUnlike = () => {
+    console.log("Unlike");
+    setLiked(false);
+  }
+
+  const onClick = liked ? handleUnlike : handleLike;
+
+  return <Icon className={className} onClick={onClick} />;
 }
 
 const SaveButton = () => {
-  return <>SaveButton</>
+  const classes = useFeedPostStyles();
+  const [saved, setSaved] = useState(false);
+  const Icon = saved ? RemoveIcon : SaveIcon;
+
+  const handleSave = () => {
+    console.log("Saved");
+    setSaved(true);
+  }
+
+  const handleUnSave = () => {
+    console.log("Unsaved");
+    setSaved(false);
+  }
+
+  const onClick = saved ? handleUnSave : handleSave;
+
+  return <Icon className={classes.saveIcon} onClick={onClick} />;
 }
 
 const Comment = () => {
-  return <>Comment</>
+  const classes = useFeedPostStyles();
+  const [content, setContent] = useState("");
+
+  return (
+    <div className={classes.commentContainer}>
+    <TextField 
+      fullWidth
+      value={content}
+      placeholder="Add a comment..."
+      multiline
+      maxRows={2}
+      minRows={1}
+      onChange={event => setContent(event.target.value)}
+      className={classes.textField}
+      InputProps={ {
+        classes: {
+          root: classes.root,
+          underline: classes.underline
+        }
+      } }
+    />
+    <Button
+      color="primary"
+      className={classes.commentButton}
+      disabled={!content.trim()}
+    >
+      Post
+    </Button>
+  </div>
+  )
 }
 
 export default FeedPost;

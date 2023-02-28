@@ -4,7 +4,7 @@ import Layout from "../components/shared/Layout";
 import { Link } from "react-router-dom";
 
 const NotFoundPage = () => {
-  return <Layout title="Page Not Found" marginTop={120}>
+  return <Layout minimalNavbar title="Page Not Found" marginTop={120}>
     <Typography variant="h5" align="center" paragraph style={ {fontWeight: "bold"} }>
       Sorry, this page isn't available.
     </Typography>
