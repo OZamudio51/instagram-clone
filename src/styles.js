@@ -1415,12 +1415,12 @@ export const useProfilePageStyles = makeStyles(theme => {
       padding: "32px 16px 16px"
     },
     avatar: {
-      width: 90,
-      height: 90
+      width: "90px !important",
+      height: "90px !important"
     },
     unfollowDialogScrollPaper: {
-      display: "grid",
-      gridTemplateColumns: "minmax(auto, 496px)"
+      display: "grid !important",
+      gridTemplateColumns: "minmax(auto, 496px) !important"
     },
     cancelButton: {
       padding: "12px 8px !important"

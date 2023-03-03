@@ -3,15 +3,21 @@ import { usePostStyles } from "../../styles";
 import UserCard from "../shared/UserCard";
 import { CommentIcon, LikeIcon, MoreIcon, RemoveIcon, SaveIcon, ShareIcon, UnlikeIcon } from "../../icons";
 import { Link } from "react-router-dom";
-import { Button, Divider, Typography, Hidden, TextField } from "@material-ui/core";
-import FollowSuggestions from "../shared/FollowSuggestions";
+// import { Button, Divider, Typography, Hidden, TextField } from "@material-ui/core";
+import { Button, Divider, Typography, TextField } from "@material-ui/core";
 import OptionsDialog from "../shared/OptionsDialog";
 import { defaultPost } from "../../data";
+import PostSkeleton from "./PostSkeleton";
 
 const Post = () => {
  const classes = usePostStyles();
+ const [loading, setLoading] = useState(true);
  const [showOptionsDialog, setOptionsDialog] = useState();
  const { media, id, likes, user, caption, comments } = defaultPost;
+
+ setTimeout(() => setLoading(false), 2000);
+
+ if (loading) return <PostSkeleton />
 
   return (
     <div className={classes.postContainer}>
@@ -69,12 +75,12 @@ const Post = () => {
           <Typography color="textSecondary" className={classes.datePosted}>
             5 DAYS AGO
           </Typography>
-        <Hidden xsDown>
+        {/* <Hidden xsDown> */}
           <div className={classes.comment}>
             <Divider />
             <Comment />
           </div>
-        </Hidden>
+        {/* </Hidden> */}
         </div>
       </article>
       {showOptionsDialog && <OptionsDialog onClose={() => setOptionsDialog(false)}/>}
