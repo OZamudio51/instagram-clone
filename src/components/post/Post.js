@@ -94,15 +94,9 @@ const LikeButton = () => {
   const Icon = liked ? UnlikeIcon : LikeIcon;
   const className = liked ? classes.liked : classes.like;
 
-  const handleLike = () => {
-    console.log("Like");
-    setLiked(true);
-  }
+  const handleLike = () => setLiked(true);
 
-  const handleUnlike = () => {
-    console.log("Unlike");
-    setLiked(false);
-  }
+  const handleUnlike = () => setLiked(false);
 
   const onClick = liked ? handleUnlike : handleLike;
 
@@ -114,15 +108,9 @@ const SaveButton = () => {
   const [saved, setSaved] = useState(false);
   const Icon = saved ? RemoveIcon : SaveIcon;
 
-  const handleSave = () => {
-    console.log("Saved");
-    setSaved(true);
-  }
+  const handleSave = () => setSaved(true);
 
-  const handleUnSave = () => {
-    console.log("Unsaved");
-    setSaved(false);
-  }
+  const handleUnSave = () => setSaved(false);
 
   const onClick = saved ? handleUnSave : handleSave;
 

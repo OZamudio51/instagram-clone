@@ -1,6 +1,6 @@
 import React from "react";
 import { usePostSkeletonStyles } from "../../styles";
-import userMediaQuery, { useMediaQuery } from "@material-ui/core";
+import { useMediaQuery } from "@material-ui/core";
 
 export function PostSkeleton() {
   const classes = usePostSkeletonStyles();

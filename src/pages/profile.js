@@ -13,13 +13,9 @@ const ProfilePage = () => {
   const isOwner = true;
   const [showOptionsMenu, setOptionsMenu] = useState(false);
 
-  const handleOptionsMenuClick = () => {
-    setOptionsMenu(true);
-  }
+  const handleOptionsMenuClick = () => setOptionsMenu(true);
 
-  const handleCloseMenu = () => {
-    setOptionsMenu(false);
-  }
+  const handleCloseMenu = () => setOptionsMenu(false);
 
   return <Layout title={`${defaultCurrentUser.name} (@${defaultCurrentUser.username})`}>
     <div className={classes.container}>
@@ -216,9 +212,7 @@ const OptionsMenu = ({ handleCloseMenu }) => {
   const classes = useProfilePageStyles();
   const [showLogOutMessage, setLogOutMessage] = useState(false);
 
-  const handleLogOutClick = () => {
-    setLogOutMessage(true);
-  }
+  const handleLogOutClick = () => setLogOutMessage(true);
 
   return (
     <Dialog
