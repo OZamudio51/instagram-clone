@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Layout from "../components/shared/Layout";
 import { useProfilePageStyles } from "../styles";
 import { defaultCurrentUser } from "../data";
 import { Button, Card, CardContent, Dialog, DialogTitle, Hidden, Typography, Zoom, Divider, Avatar } from "@material-ui/core";
 import ProfilePicture from "../components/shared/ProfilePicture";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { GearIcon } from "../icons";
 import ProfileTabs from "../components/profile/ProfileTabs";
+import { AuthContext } from "../auth";
 
 const ProfilePage = () => {
   const classes = useProfilePageStyles();
@@ -210,9 +211,18 @@ const NameBioSection = ({ user }) => {
 
 const OptionsMenu = ({ handleCloseMenu }) => {
   const classes = useProfilePageStyles();
+  const {signOut} = useContext(AuthContext);
   const [showLogOutMessage, setLogOutMessage] = useState(false);
+  const history = useHistory();
 
-  const handleLogOutClick = () => setLogOutMessage(true);
+  const handleLogOutClick = () => {
+    setLogOutMessage(true);
+    
+    setTimeout(() => {
+      signOut();
+      history.push("/accounts/login");
+    }, 2000)
+  }
 
   return (
     <Dialog

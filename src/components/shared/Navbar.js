@@ -13,7 +13,7 @@ import {
   HomeIcon, 
   HomeActiveIcon
 } from "../../icons";
-import { defaultCurrentUser, defaultUser, getDefaultUser } from "../../data";
+import { defaultCurrentUser, getDefaultUser } from "../../data";
 import NotificationTooltip from "../notification/NotificationTooltip";
 import NotificationList from "../notification/NotificationList";
 import { useNProgress } from "@tanem/react-nprogress";
