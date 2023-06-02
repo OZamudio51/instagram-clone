@@ -649,7 +649,7 @@ export const usePostStyles = makeStyles(theme => ({
   },
   username: {
     fontWeight: "600 !important",
-    marginRight: "5px !important"
+    marginRight: "-17px !important"
   },
   datePosted: {
     fontSize: "10px !important",
@@ -1708,4 +1708,55 @@ export const useMorePostsFromUserStyles = makeStyles(theme => ({
       textDecoration: "none"
     }
   }
+}));
+
+export const useAddPostDialogStyles = makeStyles(theme => ({
+  appBar: {
+      position: "relative",
+      background: "#fff !important",
+      color: "black !important",
+      display: "flex",
+      justifyContent: "space-between",
+      height: "54px !important"
+  },
+  toolbar: {
+      minHeight: "54px !important"
+  },
+  title: {
+      flex: 1,
+      fontWeight: 600
+  },
+  paper: {
+      display: "flex",
+      alignItems: "flex-start",
+      "& > *": {
+          margin: theme.spacing(1)
+      }
+  },
+  editor: {
+      flex: 1
+  },
+  avatarLarge: {
+      width: "56px !important",
+      height: "56px !important"
+  },
+  input: {
+      padding: "10px !important",
+      fontSize: "14px !important"
+  },
+  root: {
+      border: "1px solid #e6e6e6",
+      marginTop: "10px !important"
+  },
+  underline: {
+      "&::before": {
+          border: "none !important"
+      },
+      "&::after": {
+          border: "none !important"
+      },
+      "&:hover&:before": {
+          border: "none !important"
+      }
+  },
 }));

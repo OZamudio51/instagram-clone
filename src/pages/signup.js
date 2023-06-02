@@ -21,35 +21,18 @@ const SignUpPage = () => {
   const client = useApolloClient();
 
   const onSubmit = async data => {
-    // console.log(data);
     try {
       setError("");
       await signUpWithEmailAndPassword(data);
-      history.push("/");
+      setTimeout(() => history.push("/"), 0);
     } catch(err) {
-      console.error("Error signing up:", err);
-      // setError(err.message);
       handleError(err);
     }
   }
 
-  // const onSubmit = async data => {
-  //   // console.log(data);
-  //   try {
-  //     await signUpWithEmailAndPassword(data);
-  //     history.push("/");
-  //   } catch(err) {
-  //     console.error("Error signing up:", err);
-  //     setError(err.message);
-  //   }
-  // }
-
   const handleError = err => {
-    if (err.includes("users_username_key")) {
-      setError("Username already taken");
-    } else if (err.message.includes("Password should be at least 6 characters (auth/weak-password).")) {
-      setError("Password should be at least 6 characters.");
-    }
+    const cleanedMessage = err.message.split("Firebase:");
+    setError(cleanedMessage[1]);
   }
 
   const validateUsername = async username => {
@@ -197,13 +180,13 @@ const SignUpPage = () => {
 }
 
 
-const AuthError = ({ error }) => {
+export const AuthError = ({ error }) => {
   return Boolean(error) && (
     <Typography
       align="center"
       gutterBottom
       variant="body2"
-      style={{color: "red"}}
+      style={{color: "red", paddingTop: "1rem"}}
     >
       {error}
     </Typography>

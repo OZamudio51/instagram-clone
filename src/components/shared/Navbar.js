@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { AppBar, Avatar, Fade, Grid, Hidden, InputBase, Typography, Zoom } from "@material-ui/core";
 import { useNavbarStyles, WhiteTooltip, RedTooltip } from "../../styles";
 import { Link, useHistory } from "react-router-dom";
@@ -13,10 +13,14 @@ import {
   HomeIcon, 
   HomeActiveIcon
 } from "../../icons";
-import { defaultCurrentUser, getDefaultUser } from "../../data";
 import NotificationTooltip from "../notification/NotificationTooltip";
 import NotificationList from "../notification/NotificationList";
 import { useNProgress } from "@tanem/react-nprogress";
+import { useLazyQuery } from "@apollo/react-hooks";
+import { SEARCH_USERS } from "../../graphql/queries";
+import { UserContext } from "../../App";
+import { AddPostDialog } from "../post/AddPostDialog";
+import { isAfter } from "date-fns";
 
 const Navbar = ({ minimalNavbar }) => {
   const classes = useNavbarStyles();
@@ -62,16 +66,23 @@ const Logo = () => {
 
 const Search = ({ history }) => {
   const classes = useNavbarStyles();
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [query, setQuery] = useState("");
+  const [searchUsers, { data }] = useLazyQuery(SEARCH_USERS);
 
   const hasResults = Boolean(query) && results.length > 0;
 
   useEffect(() => {
     if (!query.trim()) return;
-    setResults(Array.from({ length: 5 }, () => getDefaultUser()));
-  }, [query]);
+    setLoading(true);
+    const variables = { query: `%${query}%` };
+    searchUsers({ variables });
+    if (data) {
+      setResults(data.users);
+      setLoading(false);
+    }
+  }, [query, data, searchUsers]);
 
   const handleClearInput = () => {
     setQuery("");
@@ -136,9 +147,17 @@ const Search = ({ history }) => {
 }
 
 const Links = ({ path }) => {
+  const { me, currentUserId } = useContext(UserContext);
+  const newNotifications = me.notifications.filter(({ created_at }) => 
+    isAfter(new Date(created_at), new Date(me.last_checked))
+  );
+  const hasNotifications = newNotifications.length > 0; 
   const classes = useNavbarStyles();
   const [showList, setList] = useState(false);
-  const [showTooltip, setTooltip] = useState(true);
+  const [showTooltip, setTooltip] = useState(hasNotifications);
+  const [media, setMedia] = useState(null);
+  const [showAddPostDialog, setAddPostDialog] = useState(false);
+  const inputRef = useRef();
 
   useEffect(() => {
     const timeout = setTimeout(handleHideTooltip, 5000);
@@ -159,12 +178,33 @@ const Links = ({ path }) => {
     setList(false);
   }
 
+  const openFileInput = () => {
+    inputRef.current.click();
+  }
+
+  const handleAddPost = e => {
+    setMedia(e.target.files[0]);
+    setAddPostDialog(true);
+  }
+  const handleClose = () => {
+    setAddPostDialog(false);
+  }
+
   return (
     <div className={classes.linksContainer}>
-      {showList && <NotificationList handleHideList={handleHideList} />}
+      {showList && <NotificationList notifications={me.notifications} handleHideList={handleHideList} currentUserId={currentUserId} />}
       <div className={classes.linksWrapper}>
+      {showAddPostDialog && (
+        <AddPostDialog media={media} handleClose={handleClose} />
+      )}
         <Hidden xsDown>
-          <AddIcon />
+        <input 
+          type="file"
+          style={{ display: "none" }}
+          ref={inputRef}
+          onChange={handleAddPost}
+        />
+          <AddIcon onClick={openFileInput} />
         </Hidden>
         <Link to="/">
           {path === "/" ? <HomeActiveIcon /> : <HomeIcon />}
@@ -177,17 +217,17 @@ const Links = ({ path }) => {
           open={showTooltip}
           onOpen={handleHideTooltip}
           TransitionComponent={Zoom}
-          title={<NotificationTooltip />}
+          title={<NotificationTooltip notifications={newNotifications} />}
         >
-          <div className={classes.notifications} onClick={handleToggleList}>
+          <div className={hasNotifications ? classes.notifications : ""} onClick={handleToggleList}>
             {showList ? <LikeActiveIcon /> : <LikeIcon />}
           </div>
         </RedTooltip>
-        <Link to={`/${defaultCurrentUser.username}`}>
-          <div className={path === `/${defaultCurrentUser.username}` ? classes.profileActive : ""}>
+        <Link to={`/${me.username}`}>
+          <div className={path === `/${me.username}` ? classes.profileActive : ""}>
           </div>
           <Avatar 
-            src={defaultCurrentUser.profile_image}
+            src={me.profile_image}
             className={classes.profileImage}
           />
         </Link>

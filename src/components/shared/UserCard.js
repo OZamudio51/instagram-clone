@@ -2,9 +2,8 @@ import React from "react";
 import { useUserCardStyles } from "../../styles";
 import { Link } from "react-router-dom";
 import { Avatar, Typography } from "@material-ui/core";
-import { defaultUser } from "../../data";
 
-const UserCard = ({ user = defaultUser, avatarSize = 44 }) => {
+const UserCard = ({ user, avatarSize = 44, location }) => {
   const classes = useUserCardStyles({ avatarSize });
   const { username, name, profile_image } = user;
 
@@ -24,7 +23,7 @@ const UserCard = ({ user = defaultUser, avatarSize = 44 }) => {
         </Typography>
       </Link>
       <Typography color="textSecondary" variant="body2" className={classes.typography}>
-          {name}
+          {location || name}
         </Typography>
       </div>
     </div>

@@ -2,22 +2,30 @@ import React, { useState, useEffect, createContext } from "react";
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import "firebase/database";
+import { getDatabase, ref, onValue } from "firebase/database";
 import defaultUserImage from "./images/default-user-image.jpg";
 import { useMutation } from "@apollo/react-hooks";
 import { CREATE_USER } from "./graphql/mutations";
 
 const provider = new firebase.auth.GoogleAuthProvider();
+const apiKey = process.env.REACT_APP_FIREBASE_API_KEY;
+const authDomain = process.env.REACT_APP_FIREBASE_AUTH_DOMAIN;
+const databaseUrl = process.env.REACT_APP_FIREBASE_DATABASE_URL;
+const projectId = process.env.REACT_APP_FIREBASE_PROJECT_ID;
+const storageBucket = process.env.REACT_APP_FIREBASE_STORAGE_BUCKET;
+const messageSenderId = process.env.REACT_APP_FIREBASE_MESSAGING_CENTER_ID;
+const appId = process.env.REACT_APP_FIREBASE_APP_ID;
+const measurementId = process.env.REACT_APP_FIREBASE_MEASUREMENT_ID;
 
-// Find these options in your Firebase console
 firebase.initializeApp({
-    apiKey: "AIzaSyCZ88qckRbCdYqzajpzIXDXK2aJjlPNxTg",
-    authDomain: "instagram-clone-6db6e.firebaseapp.com",
-    projectId: "instagram-clone-6db6e",
-    storageBucket: "instagram-clone-6db6e.appspot.com",
-    messagingSenderId: "869245921781",
-    appId: "1:869245921781:web:7adb2b68af3c3fd09a98bc",
-    measurementId: "G-ESRXHMT0PL"
+    apiKey: `${apiKey}`,
+    authDomain: `${authDomain}`,
+    databaseURL: `${databaseUrl}`,
+    projectId: `${projectId}`,
+    storageBucket: `${storageBucket}`,
+    messagingSenderId: `${messageSenderId}`,
+    appId: `${appId}`,
+    measurementId: `${measurementId}`
 });
 
 export const AuthContext = createContext();
@@ -29,22 +37,23 @@ function AuthProvider({ children }) {
   useEffect(() => {
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
+        const database = getDatabase();
         const token = await user.getIdToken();
         const idTokenResult = await user.getIdTokenResult();
+        
         const hasuraClaim = idTokenResult.claims["https://hasura.io/jwt/claims"];
 
         if (hasuraClaim) {
           setAuthState({ status: "in", user, token });
         } else {
-          // Check if refresh is required.
-          const metadataRef = firebase.database().ref(`metadata/${user.uid}/refreshTime`);
+          const userRef = ref(database, `metadata/${user.uid}/refreshTime`);
 
-          metadataRef.on("value", async (data) => {
-            if(!data.exists) return
+          onValue(userRef, data => {
+              if(!data.exists) return;
             // Force refresh to pick up the latest custom claims changes.
-            const token = await user.getIdToken(true);
+            const token = user.getIdToken(true);
             setAuthState({ status: "in", user, token });
-          });
+          })
         }
       } else {
         setAuthState({ status: "out" });
@@ -52,13 +61,36 @@ function AuthProvider({ children }) {
     });
   }, []);
 
-  const signInWithGoogle = async () => {
+  const logInWithGoogle = async () => {
     try {
-      await firebase.auth().signInWithPopup(provider);
+      const data = await firebase.auth().signInWithPopup(provider);
+
+      if (data.additionalUserInfo.isNewUser) {
+        const {uid, displayName, email, photoURL } = data.user;
+        const username = `${displayName.replace(/\s+/g, "")}${uid.slice(-5)}`;
+        const variables = {
+          userId: uid,
+          name: displayName,
+          username,
+          email,
+          bio: "",
+          website: "",
+          phoneNumber: "",
+          profileImage: photoURL
+        }
+        await createUser({ variables });
+      }
+
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
+
+  const logInWithEmailAndPassword = async (email, password) => {
+    const data = await firebase.auth().signInWithEmailAndPassword(email, password);
+
+    return data;
+  }
 
   const signUpWithEmailAndPassword = async formData => {
     const data = await firebase.auth().createUserWithEmailAndPassword(formData.email, formData.password);
@@ -84,9 +116,13 @@ function AuthProvider({ children }) {
       await firebase.auth().signOut();
       setAuthState({ status: "out" });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
+
+  const updateEmail = async email => {
+    await authState.user.updateEmail(email);
+  }
 
   if (authState.status === "loading") {
     return null;
@@ -95,9 +131,11 @@ function AuthProvider({ children }) {
       <AuthContext.Provider
         value={{
             authState,
-            signInWithGoogle,
+            logInWithGoogle,
             signOut, 
-            signUpWithEmailAndPassword
+            signUpWithEmailAndPassword,
+            logInWithEmailAndPassword,
+            updateEmail
         }}
       >
         {children}

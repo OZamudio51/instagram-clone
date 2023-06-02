@@ -2,11 +2,14 @@ import { InMemoryCache } from "apollo-cache-inmemory";
 import ApolloClient from "apollo-client";
 import { WebSocketLink } from "apollo-link-ws";
 
-const headers = {"x-hasura-admin-secret": "ZXT0pD6VAzTSFvostnZnrCTT6KAa1VeX6utME0EG51uMUNwJ10yAkqrdoBKu91mB"};
+const token = process.env.REACT_APP_HASURA_SECRET;
+const url = process.env.REACT_APP_HASURA_URL;
+
+const headers = {"x-hasura-admin-secret": `${token}`};
 
 const client = new ApolloClient({
     link: new WebSocketLink({
-        uri: "wss://expert-mammoth-86.hasura.app/v1/graphql",
+        uri: `${url}`,
         options: {
             reconnect: true,
             connectionParams: {
